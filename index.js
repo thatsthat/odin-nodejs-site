@@ -1,28 +1,22 @@
-var http = require("http");
+const express = require("express");
+const app = express();
+const port = 3000;
 var fs = require("fs");
-const { URL } = require("url");
+const url = require("url");
 
-http
-  .createServer(function (req, res) {
-    const myURL = req.url;
-    if (myURL === "/") {
-      var filename = "./index.html";
-    } else {
-      var filename = "." + myURL + ".html";
-    }
+app.get("/", function (req, res) {
+  res.sendFile(__dirname + "/index.html");
+});
 
-    fs.readFile(filename, function (err, data) {
-      if (data === undefined) {
-        fs.readFile("./404.html", function (err, data) {
-          res.writeHead(200, { "Content-Type": "text/html" });
-          res.write(data);
-          return res.end();
-        });
-      } else {
-        res.writeHead(200, { "Content-Type": "text/html" });
-        res.write(data);
-        return res.end();
-      }
-    });
-  })
-  .listen(8080);
+app.get("*", function (req, res) {
+  const filePath = __dirname + req._parsedUrl.pathname + ".html";
+  if (fs.existsSync(filePath)) {
+    res.sendFile(filePath);
+  } else {
+    res.sendFile(__dirname + "/404.html");
+  }
+});
+
+app.listen(port, () => {
+  console.log(`Example app listening on port ${port}!`);
+});
